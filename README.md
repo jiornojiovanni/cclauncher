@@ -13,7 +13,7 @@ Build: `$ go build`
 Usage: 
 - `$ ./cclauncher` will download the last build of Cdda, *tiles*, and extract it.
 - `$ ./cclauncher -d` will only download the archive. (**optional**)
-- `$ ./cclauncher -v [VERSION]` downloads a specific version (**NOT IMPLEMENTED**) (default to **latest**)
+- `$ ./cclauncher -v [VERSION]` downloads a specific version (default to **latest**)
 - `$ ./cclauncher -g [t/c]` download tiles or ncurses version (default to [**t**]iles)
 
 Example: `$ ./cclauncher -d -g c` downloads only the archive of the latest Ncurses build
@@ -32,9 +32,10 @@ Help: `$ ./cclauncher -h` Show help.
 - Download of the last build (tiles or curses)
 - Extraction
 - Barebones cli
-
-#### TODO:
 - Download of a specific version.
+  
+#### TODO:
+
 - Updates
 - Backups
 - Show changelog
