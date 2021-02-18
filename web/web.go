@@ -44,15 +44,38 @@ func LastBuild(graphics string) (Build, error) {
 	}
 
 	for build.Version = response.Number; build.Version > 0; build.Version-- {
-		resp, err := http.Get("https://ci.narc.ro/job/Cataclysm-Matrix/Graphics=" + build.Graphic + ",Platform=Linux_x64/" + fmt.Sprint(build.Version) + "/api/json?pretty=true")
+		result, err := CheckBuild(build)
 		if err != nil {
 			return Build{}, err
 		}
-		defer resp.Body.Close()
 
-		if response.Result == "SUCCESS" {
+		if result {
 			return build, nil
 		}
+
 	}
 	return build, nil
+}
+
+//CheckBuild check if the version/graphic combo was compiled succesfully.
+func CheckBuild(build Build) (bool, error) {
+	resp, err := http.Get("https://ci.narc.ro/job/Cataclysm-Matrix/Graphics=" + build.Graphic + ",Platform=Linux_x64/" + fmt.Sprint(build.Version) + "/api/json?pretty=true")
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	var response jsonResponse
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return false, err
+	}
+
+	if response.Result == "SUCCESS" {
+		return true, nil
+	}
+
+	return false, nil
+
 }
