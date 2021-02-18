@@ -17,7 +17,7 @@ type Build struct {
 	Graphic string
 }
 
-//LastBuild return a pointer to a Build struct containing the version of the last successful build, with it's graphics type.
+//LastBuild return a Build struct containing the version of the last successful build, with it's graphics type.
 func LastBuild(graphics string) (Build, error) {
 	build := Build{}
 	if graphics == "c" {
