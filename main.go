@@ -60,6 +60,7 @@ func main() {
 
 	if !dontShowChangelog {
 		fmt.Println("Changelog: ")
+		fmt.Printf("\033[32m# %-26s%-80sCommit\n", "Date", "Message")
 		for i := 0; i < len(commits); i++ {
 			fmt.Print("\033[31m", i+1)
 			fmt.Print(" \033[33m", commits[i].Date)
