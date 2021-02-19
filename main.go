@@ -59,6 +59,7 @@ func main() {
 	commits, err := web.GetChangelog(build)
 
 	if !dontShowChangelog {
+		fmt.Println("Changelog: ")
 		for i := 0; i < len(commits); i++ {
 			fmt.Print("\033[31m", i+1)
 			fmt.Print(" \033[33m", commits[i].Date)
