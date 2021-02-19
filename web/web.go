@@ -7,8 +7,18 @@ import (
 )
 
 type jsonResponse struct {
-	Number int
-	Result string
+	Number    int    `json:"number"`
+	Result    string `json:"result"`
+	ChangeSet struct {
+		Item []CommitData `json:"items"`
+	} `json:"changeSet"`
+}
+
+//CommitData represent a single commit.
+type CommitData struct {
+	CommitID string `json:"commitId"`
+	Date     string `json:"date"`
+	Msg      string `json:"msg"`
 }
 
 //Build contains the version and the graphics (tiles or curses) of a CDDA build
@@ -20,41 +30,27 @@ type Build struct {
 //LastBuild return a Build struct containing the version of the last successful build, with it's graphics type.
 func LastBuild(graphics string) (Build, error) {
 	build := Build{}
-	if graphics == "c" {
-		build.Graphic = "Curses"
-	} else {
-		build.Graphic = "Tiles"
-	}
-	resp, err := http.Get("https://ci.narc.ro/job/Cataclysm-Matrix/Graphics=" + build.Graphic + ",Platform=Linux_x64/lastBuild/api/json?pretty=true")
+
+	build.Graphic = graphics
+
+	resp, err := http.Get("https://ci.narc.ro/job/Cataclysm-Matrix/Graphics=" + build.Graphic + ",Platform=Linux_x64/lastSuccessfulBuild/api/json?pretty=true")
 	if err != nil {
 		return Build{}, err
 	}
 	defer resp.Body.Close()
 
-	var response jsonResponse
-
-	err = json.NewDecoder(resp.Body).Decode(&response)
+	json, err := decodeResponse(resp)
 	if err != nil {
 		return Build{}, err
 	}
 
-	if response.Result == "SUCCESS" {
-		build.Version = response.Number
+	//Unnecessary check, but better safe than sorry
+	if json.Result == "SUCCESS" {
+		build.Version = json.Number
 		return build, nil
 	}
 
-	for build.Version = response.Number; build.Version > 0; build.Version-- {
-		result, err := CheckBuild(build)
-		if err != nil {
-			return Build{}, err
-		}
-
-		if result {
-			return build, nil
-		}
-
-	}
-	return build, nil
+	return Build{}, nil
 }
 
 //CheckBuild check if the version/graphic combo was compiled succesfully.
@@ -65,17 +61,27 @@ func CheckBuild(build Build) (bool, error) {
 	}
 	defer resp.Body.Close()
 
-	var response jsonResponse
-
-	err = json.NewDecoder(resp.Body).Decode(&response)
+	json, err := decodeResponse(resp)
 	if err != nil {
 		return false, err
 	}
 
-	if response.Result == "SUCCESS" {
+	//Here the check is useful
+	if json.Result == "SUCCESS" {
 		return true, nil
 	}
 
 	return false, nil
 
+}
+
+func decodeResponse(resp *http.Response) (*jsonResponse, error) {
+	var response jsonResponse
+
+	err := json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, nil
 }

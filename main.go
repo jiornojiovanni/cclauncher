@@ -7,24 +7,25 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 )
 
 func main() {
 	var err error
 	var version string
-	var graphics string
+	var g string
 	var downloadOnly bool
 	flag.StringVar(&version, "v", "latest", "Specify the version of CDDA.")
-	flag.StringVar(&graphics, "g", "t", "Specify the graphic version of CDDA, t for tiles and c for curses.")
+	flag.StringVar(&g, "g", "t", "Specify the graphic version of CDDA, t for tiles and c for curses.")
 	flag.BoolVar(&downloadOnly, "d", false, "Set this flag to true to only download the build")
 	flag.Parse()
 
-	var g string
-	if graphics == "c" {
-		g = "Curses"
+	var graphics string
+	if g == "c" {
+		graphics = "Curses"
 	} else {
-		g = "Tiles"
+		graphics = "Tiles"
 	}
 
 	var build web.Build
@@ -35,16 +36,14 @@ func main() {
 			log.Fatal("There was an error while parsing the version number.")
 		}
 
-		build = web.Build{Version: v, Graphic: g}
+		build = web.Build{Version: v, Graphic: graphics}
 
 		res, err := web.CheckBuild(build)
-		if err != nil {
-			log.Fatal(err)
+		if err != nil || !res {
+			fmt.Println(("This version is unavailable, try another."))
+			os.Exit(0)
 		}
 
-		if !res {
-			log.Fatal("This version is unavailable, try another.")
-		}
 	} else {
 
 		build, err = web.LastBuild(graphics)
