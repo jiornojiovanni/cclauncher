@@ -75,6 +75,23 @@ func CheckBuild(build Build) (bool, error) {
 
 }
 
+//GetChangelog returns an array containing the various commits of the build.
+func GetChangelog(build Build) ([]CommitData, error) {
+	resp, err := http.Get("https://ci.narc.ro/job/Cataclysm-Matrix/Graphics=" + build.Graphic + ",Platform=Linux_x64/" + fmt.Sprint(build.Version) + "/api/json?pretty=true")
+	if err != nil {
+		return []CommitData{}, err
+	}
+	defer resp.Body.Close()
+
+	json, err := decodeResponse(resp)
+	if err != nil {
+		return []CommitData{}, err
+	}
+
+	return json.ChangeSet.Item, nil
+
+}
+
 func decodeResponse(resp *http.Response) (*jsonResponse, error) {
 	var response jsonResponse
 

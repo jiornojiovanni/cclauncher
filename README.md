@@ -11,11 +11,11 @@ Updates are not implemented right now so you should delete CDDA folder before ca
 Build: `$ go build`
 
 Usage: 
-- `$ ./cclauncher` will download the last build of Cdda, *tiles*, and extract it.
+- `$ ./cclauncher` will download the last build of Cdda, *tiles*, show the changelog, and extract it.
 - `$ ./cclauncher -d` will only download the archive. (**optional**)
-- `$ ./cclauncher -v [VERSION]` downloads a specific version (default to **latest**)
-- `$ ./cclauncher -g [t/c]` download tiles or ncurses version (default to [**t**]iles)
-
+- `$ ./cclauncher -v [VERSION]` downloads a specific version. (default to **latest**)
+- `$ ./cclauncher -g [t/c]` download tiles or ncurses version. (default to [**t**]iles)
+- `$ ./cclauncher -c` this flag disable the changelog.
 Example: `$ ./cclauncher -d -g c` downloads only the archive of the latest Ncurses build
 
 
@@ -33,12 +33,11 @@ Help: `$ ./cclauncher -h` Show help.
 - Extraction
 - Barebones cli
 - Download of a specific version.
-  
+- Show changelog
 #### TODO:
 
 - Updates
 - Backups
-- Show changelog
 - Bright Nights download (Maybe)
 
 
