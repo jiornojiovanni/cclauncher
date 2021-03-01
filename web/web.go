@@ -49,7 +49,6 @@ func LastBuild(graphics string) (Build, error) {
 		build.Version = json.Number
 		return build, nil
 	}
-
 	return Build{}, nil
 }
 
@@ -72,7 +71,6 @@ func CheckBuild(build Build) (bool, error) {
 	}
 
 	return false, nil
-
 }
 
 //GetChangelog returns an array containing the various commits of the build.
