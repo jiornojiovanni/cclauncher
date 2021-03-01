@@ -4,10 +4,6 @@
 
 You may need to install CDDA dependencies based on your distribution.
 
-Updates are not implemented right now so you should delete CDDA folder before calling the program again.
-
-## IT WON'T BACKUP YOUR SAVES! YOU ARE WARNED.
-
 Build: `$ go build`
 
 Usage: 
@@ -32,15 +28,15 @@ Help: `$ ./cclauncher -h` Show help.
 - Download of the last build (tiles or curses)
 - Extraction
 - Barebones cli
-- Download of a specific version.
+- Download of a specific version
 - Show changelog
 - Updates
 - Backups
 
 #### TODO:
 - Fix this mess
+- Tileset backup
 
+## Tileset are not backupped right now, be careful.
 ## This is not currently usable for daily use!
 Stick to your package managers or manual downloads for now.
-
-###### This is probably bad Go code, feel free to help me correcting it :D !
