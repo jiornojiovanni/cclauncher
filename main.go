@@ -23,6 +23,28 @@ func main() {
 	flag.BoolVar(&dontShowChangelog, "no-c", false, "Set this flag to true to don't show the changelog")
 	flag.Parse()
 
+	isInstalled, err := archives.CheckFolder("./" + archives.Parentfolder)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if isInstalled && !downloadOnly {
+		fmt.Println("Older CDDA version found, backupping data...")
+		err = archives.CreateBackup("./"+archives.Parentfolder, false)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println("Backup saved.")
+
+		err = os.RemoveAll("./" + archives.Parentfolder)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Older CDDA version deleted.")
+	}
+
 	var graphics string
 	if g == "c" {
 		graphics = "Curses"
@@ -86,5 +108,18 @@ func main() {
 		}
 
 		fmt.Println("Files extracted.")
+
+		isBackupped, err := archives.CheckFolder(archives.Parentfolder + ".zip")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if isBackupped {
+			err = archives.ExtractBackup(archives.Parentfolder + ".zip")
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("Backup extracted.")
+		}
 	}
 }

@@ -34,12 +34,11 @@ Help: `$ ./cclauncher -h` Show help.
 - Barebones cli
 - Download of a specific version.
 - Show changelog
-#### TODO:
-
 - Updates
 - Backups
-- Bright Nights download (Maybe)
 
+#### TODO:
+- Fix this mess
 
 ## This is not currently usable for daily use!
 Stick to your package managers or manual downloads for now.
