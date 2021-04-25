@@ -4,15 +4,17 @@ import (
 	"archive/tar"
 	"archive/zip"
 	"compress/gzip"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 const (
-	//Parentfolder is the name of the cdda directory
-	Parentfolder string = "cataclysm"
+	//ParentFolder is the name of the cdda directory
+	ParentFolder string = "cataclysm"
+	TempFolder   string = "previous_version"
+	Suffix       string = ".zip"
 )
 
 //Extract a tar.gz archive to the root of the folder
@@ -28,30 +30,30 @@ func Extract(name string) error {
 	}
 	defer archive.Close()
 
-	var topfolder string
-	tar := tar.NewReader(archive)
+	var folder string
+	reader := tar.NewReader(archive)
 	for {
-		header, err := tar.Next()
+		header, err := reader.Next()
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			return err
 		}
 
-		path := filepath.Join(Parentfolder, header.Name)
-		var newpath string
+		path := filepath.Join(ParentFolder, header.Name)
+		var newPath string
 
 		info := header.FileInfo()
 
-		/* Here we find the name of the folder inside the downloaded archive (eg. cataclysmdda-0.E).
+		/* Here we find the name of the folder inside the downloaded archive (eg. cataclysm-0.E).
 		 * This name change at every stable release, so we need to find it at runtime.
 		 */
-		if filepath.Dir(path) == Parentfolder {
-			topfolder = filepath.Base(path)
+		if filepath.Dir(path) == ParentFolder {
+			folder = filepath.Base(path)
 			continue
 		} else {
 			//We remove that name so the top folder it's always a generic "cataclysm".
-			newpath, err = filepath.Rel(Parentfolder+"/"+topfolder, path)
+			newPath, err = filepath.Rel(ParentFolder+"/"+folder, path)
 			if err != nil {
 				return err
 			}
@@ -59,29 +61,30 @@ func Extract(name string) error {
 		}
 
 		if info.IsDir() {
-			if err = os.MkdirAll(Parentfolder+"/"+newpath, info.Mode()); err != nil {
+			if err = os.MkdirAll(ParentFolder+"/"+newPath, info.Mode()); err != nil {
 				return err
 			}
 			continue
 		}
 
-		file, err := os.OpenFile(Parentfolder+"/"+newpath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
+		file, err := os.OpenFile(ParentFolder+"/"+newPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
 		if err != nil {
 			return err
 		}
-		defer file.Close()
-		_, err = io.Copy(file, tar)
+		_, err = io.Copy(file, reader)
 		if err != nil {
 			return err
 		}
+		file.Close()
 	}
 
 	return nil
 }
 
-//CreateBackup create a zip archive of the cataclysm directory, with the flag all set to false it will only backup Saves, Sound, Config and Font.
-func CreateBackup(name string, all bool) error {
-	file, err := os.Create(name + ".zip")
+//CreateBackup create a zip archive of the cataclysm directory.
+func CreateBackup(folder string) error {
+	name := ParentFolder + " " + time.Now().Format(time.Stamp) + Suffix
+	file, err := os.Create(name)
 	if err != nil {
 		return err
 	}
@@ -117,44 +120,21 @@ func CreateBackup(name string, all bool) error {
 		return nil
 	}
 
-	if all {
-		err = filepath.Walk(name, walker)
-		if err != nil {
-			return err
-		}
-	} else {
-
-		err = filepath.Walk(name+"/save", walker)
-		if err != nil {
-			fmt.Println("Folder 'save' not found... skipping")
-		}
-
-		err = filepath.Walk(name+"/config", walker)
-		if err != nil {
-			fmt.Println("Folder 'config' not found... skipping")
-		}
-
-		err = filepath.Walk(name+"/sound", walker)
-		if err != nil {
-			fmt.Println("Folder 'sound' not found... skipping")
-		}
-
-		err = filepath.Walk(name+"/font", walker)
-		if err != nil {
-			fmt.Println("Folder 'font' not found... skipping")
-		}
-
+	err = filepath.Walk(folder, walker)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
 
 //ExtractBackup extract the cdda backup.
 func ExtractBackup(name string) error {
 	reader, err := zip.OpenReader(name)
-	defer reader.Close()
 	if err != nil {
 		return err
 	}
+	defer reader.Close()
 
 	for _, file := range reader.File {
 
@@ -167,30 +147,26 @@ func ExtractBackup(name string) error {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
 
 		fd, err := file.Open()
 		if err != nil {
 			return err
 		}
-		defer fd.Close()
 
 		_, err = io.Copy(f, fd)
 		if err != nil {
 			return err
 		}
+
+		err = f.Close()
+		if err != nil {
+			return err
+		}
+
+		err = fd.Close()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
-}
-
-//CheckFolder check if the folder exists
-func CheckFolder(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
 }
