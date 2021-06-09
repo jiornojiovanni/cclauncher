@@ -20,7 +20,6 @@ of CDDA, then it extracts it and moves old data from the previous version
 to the new one.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
-		changelogSwitch, _ := cmd.Flags().GetBool("changelog")
 		cursesSwitch, _ := cmd.Flags().GetBool("ncurses")
 		versionFlag, _ := cmd.Flags().GetInt("version")
 		build := web.Build{}
@@ -46,15 +45,6 @@ to the new one.`,
 			if err != nil {
 				log.Fatal(err)
 			}
-		}
-
-		if changelogSwitch {
-			commits, err := web.GetChangelog(build)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			utils.PrintChangelog(commits)
 		}
 
 		fmt.Println("Downloading version", build.Version)
@@ -116,7 +106,6 @@ to the new one.`,
 func init() {
 	rootCmd.AddCommand(downloadCmd)
 
-	downloadCmd.Flags().BoolP("changelog", "c", false, "Display changelog")
 	downloadCmd.Flags().BoolP("ncurses", "n", false, "Ncurses version")
 	downloadCmd.Flags().IntP("version", "v", -1, "Experimental version number")
 }

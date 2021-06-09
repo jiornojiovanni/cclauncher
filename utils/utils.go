@@ -2,8 +2,6 @@ package utils
 
 import (
 	"cclauncher/archives"
-	"cclauncher/web"
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -18,20 +16,6 @@ func CheckFolder(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
-}
-
-func PrintChangelog(commits []web.CommitData) {
-	fmt.Println("Changelog: ")
-	fmt.Printf("\033[32m# %-26s%-80sCommit\n", "Date", "Message")
-	for i := 0; i < len(commits); i++ {
-		fmt.Printf("\033[31m%d", i+1)
-		fmt.Print(" ")
-		fmt.Printf("\033[33m%-26s", commits[i].Date)
-		fmt.Printf("\033[37m%-80s", commits[i].Msg)
-		fmt.Print("\033[34m", commits[i].CommitID)
-		fmt.Print("\033[0m")
-		fmt.Print("\n")
-	}
 }
 
 //GetCustomFolders compares the clean install of cdda to the player one and detects
