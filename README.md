@@ -9,6 +9,5 @@ Build: `$ go build`
 Usage: 
 - `$ ./cclauncher` show a generic usage of the tool.
 - `$ ./cclauncher download` will download the latest Tiles build of C:DDA, backup the previous installation and restore any tilesets, saves, soundpacks etc.
-- `$ ./cclauncher changelog` will show the changelog of the latest C:DDA version.
 
 Help: `$ ./cclauncher -h` or the `-h` with any subcommands will show additional flags and options.
