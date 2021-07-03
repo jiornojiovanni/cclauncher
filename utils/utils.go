@@ -100,31 +100,18 @@ func RestoreCustomContent(curses bool) error {
 
 //RestoreData moves restore user generated data.
 func RestoreData() error {
-	content := [...]string{"save", "config"}
+	content := []string{"save", "config"}
 	for _, folder := range content {
-		exists, err := CheckFolder(archives.ParentFolder + "/" + folder)
+		exists, err := CheckFolder(archives.TempFolder + "/" + folder)
 		if err != nil {
 			return err
 		}
 
 		if exists {
-			dir, err := ioutil.ReadDir(archives.ParentFolder + "/" + folder)
-			if len(dir) != 0 {
-				if err != nil {
-					return err
-				}
-
-				set := make([]string, len(dir))
-				for _, f := range dir {
-					set = append(set, f.Name())
-				}
-
-				err = restoreFolders(folder, set)
-				if err != nil {
-					return err
-				}
+			err := os.Rename(archives.TempFolder+"/"+folder, archives.ParentFolder+"/"+folder)
+			if err != nil {
+				return err
 			}
-
 		}
 	}
 	return nil

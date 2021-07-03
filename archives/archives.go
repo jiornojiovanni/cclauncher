@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -19,6 +20,9 @@ const (
 
 //Extract a tar.gz archive to the root of the folder
 func Extract(name string) error {
+	var found bool = false
+	var baseFolder, path string
+
 	gz, err := os.Open(name)
 	if err != nil {
 		return err
@@ -30,7 +34,6 @@ func Extract(name string) error {
 	}
 	defer archive.Close()
 
-	var folder string
 	reader := tar.NewReader(archive)
 	for {
 		header, err := reader.Next()
@@ -39,35 +42,32 @@ func Extract(name string) error {
 		} else if err != nil {
 			return err
 		}
-
-		path := filepath.Join(ParentFolder, header.Name)
-		var newPath string
-
 		info := header.FileInfo()
 
-		/* Here we find the name of the folder inside the downloaded archive (eg. cataclysm-0.E).
-		 * This name change at every stable release, so we need to find it at runtime.
-		 */
-		if filepath.Dir(path) == ParentFolder {
-			folder = filepath.Base(path)
-			continue
-		} else {
-			//We remove that name so the top folder it's always a generic "cataclysm".
-			newPath, err = filepath.Rel(ParentFolder+"/"+folder, path)
+		if strings.Split(header.Name, "-")[0] == "cataclysmdda" && !found {
+			baseFolder = header.Name
+			found = true
+			err = os.Mkdir(ParentFolder, info.Mode())
 			if err != nil {
 				return err
 			}
-
+			continue
+		} else {
+			newPath, err := filepath.Rel(baseFolder, header.Name)
+			if err != nil {
+				return err
+			}
+			path = filepath.Join(ParentFolder, newPath)
 		}
 
 		if info.IsDir() {
-			if err = os.MkdirAll(ParentFolder+"/"+newPath, info.Mode()); err != nil {
+			if err = os.MkdirAll(path, info.Mode()); err != nil {
 				return err
 			}
 			continue
 		}
 
-		file, err := os.OpenFile(ParentFolder+"/"+newPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
+		file, err := os.Create(path)
 		if err != nil {
 			return err
 		}
