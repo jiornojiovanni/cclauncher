@@ -21,25 +21,16 @@ to the new one.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		cursesSwitch, _ := cmd.Flags().GetBool("ncurses")
-		versionFlag, _ := cmd.Flags().GetInt("version")
+		versionFlag, _ := cmd.Flags().GetString("version")
 		build := web.Build{}
 
-		if versionFlag != -1 {
+		if versionFlag != "" {
 			build.Version = versionFlag
 			if cursesSwitch {
-				build.Graphic = "Curses"
+				build.Graphic = "curses"
 			} else {
-				build.Graphic = "Tiles"
+				build.Graphic = "tiles"
 			}
-			exists, err := web.CheckBuild(build)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if !exists {
-				log.Fatal("This build version does not exists at the moment. Try later or with a different version.")
-			}
-
 		} else {
 			build, err = web.LastBuild(cursesSwitch)
 			if err != nil {
@@ -107,5 +98,5 @@ func init() {
 	rootCmd.AddCommand(downloadCmd)
 
 	downloadCmd.Flags().BoolP("ncurses", "n", false, "Ncurses version")
-	downloadCmd.Flags().IntP("version", "v", -1, "Experimental version number")
+	downloadCmd.Flags().StringP("version", "v", "", "Experimental version string")
 }

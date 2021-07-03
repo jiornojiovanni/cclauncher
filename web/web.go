@@ -6,28 +6,33 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/cheggaaa/pb/v3"
 )
 
-type jsonResponse struct {
-	Number    int    `json:"number"`
-	Result    string `json:"result"`
-	ChangeSet struct {
-		Item []CommitData `json:"items"`
-	} `json:"changeSet"`
-}
-
-//CommitData represent a single commit.
-type CommitData struct {
-	CommitID string `json:"commitId"`
-	Date     string `json:"date"`
-	Msg      string `json:"msg"`
+type githubResponse []struct {
+	Name   string `json:"name"`
+	Assets []struct {
+		URL                string    `json:"url"`
+		ID                 int       `json:"id"`
+		NodeID             string    `json:"node_id"`
+		Name               string    `json:"name"`
+		Label              string    `json:"label"`
+		ContentType        string    `json:"content_type"`
+		State              string    `json:"state"`
+		Size               int       `json:"size"`
+		DownloadCount      int       `json:"download_count"`
+		CreatedAt          time.Time `json:"created_at"`
+		UpdatedAt          time.Time `json:"updated_at"`
+		BrowserDownloadURL string    `json:"browser_download_url"`
+	} `json:"assets"`
 }
 
 //Build contains the version and the graphics (tiles or curses) of a CDDA build
 type Build struct {
-	Version int
+	Version string
 	Graphic string
 }
 
@@ -36,72 +41,47 @@ func LastBuild(curses bool) (Build, error) {
 	build := Build{}
 
 	if curses {
-		build.Graphic = "Curses"
+		build.Graphic = "curses"
 	} else {
-		build.Graphic = "Tiles"
+		build.Graphic = "tiles"
 	}
 
-	resp, err := http.Get("https://ci.narc.ro/job/Cataclysm-Matrix/Graphics=" + build.Graphic + ",Platform=Linux_x64/lastSuccessfulBuild/api/json?pretty=true")
+	resp, err := http.Get("https://api.github.com/repos/CleverRaven/Cataclysm-DDA/releases?per_page=1")
 	if err != nil {
 		return Build{}, err
 	}
 	defer resp.Body.Close()
 
-	jsonResp, err := decodeResponse(resp)
+	gitResp, err := decodeResponse(resp)
 	if err != nil {
 		return Build{}, err
 	}
 
-	//Unnecessary check, but better safe than sorry
-	if jsonResp.Result == "SUCCESS" {
-		build.Version = jsonResp.Number
-		return build, nil
-	}
-	return Build{}, nil
+	build.Version = strings.Split((*gitResp)[0].Name, " ")[3]
+	return build, nil
 }
 
-//CheckBuild check if the version/graphic combo was compiled successfully.
-func CheckBuild(build Build) (bool, error) {
-	resp, err := http.Get("https://ci.narc.ro/job/Cataclysm-Matrix/Graphics=" + build.Graphic + ",Platform=Linux_x64/" + fmt.Sprint(build.Version) + "/api/json?pretty=true")
-	if err != nil {
-		return false, err
-	}
-	defer resp.Body.Close()
+func decodeResponse(resp *http.Response) (*githubResponse, error) {
+	response := &githubResponse{}
 
-	jsonResponse, err := decodeResponse(resp)
-	if err != nil {
-		return false, err
-	}
-
-	//Here the check is useful
-	if jsonResponse.Result == "SUCCESS" {
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func decodeResponse(resp *http.Response) (*jsonResponse, error) {
-	var response jsonResponse
-
-	err := json.NewDecoder(resp.Body).Decode(&response)
+	err := json.NewDecoder(resp.Body).Decode(response)
 	if err != nil {
 		return nil, err
 	}
 
-	return &response, nil
+	return response, nil
 }
 
 //GetBuild download the specified version and return the name of the zip if successful.
 func GetBuild(build Build) (string, error) {
-	resp, err := http.Get("https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-jenkins-b" + fmt.Sprint(build.Version) + "/cataclysmdda-0.E-Linux_x64-" + build.Graphic + "-b" + fmt.Sprint(build.Version) + ".tar.gz")
+	resp, err := http.Get("https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-" + build.Version + "/cdda-linux-" + build.Graphic + "-x64-" + build.Version + ".tar.gz")
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
-		return "", fmt.Errorf("build not found on Github")
+		return "", fmt.Errorf("this build version does not exists at the moment. Try later or with a different version")
 	}
 
 	filename := "cataclysm-" + build.Graphic + "-" + fmt.Sprint(build.Version) + ".tar.gz"
