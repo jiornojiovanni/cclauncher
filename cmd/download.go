@@ -14,9 +14,9 @@ import (
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download a new version of CDDA",
+	Short: "Download a new version of C:BN",
 	Long: `The download command by default downloads the latest experimental
-of CDDA, then it extracts it and moves old data from the previous version
+of C:BN, then it extracts it and moves old data from the previous version
 to the new one.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
@@ -62,7 +62,7 @@ to the new one.`,
 			}
 		}
 
-		fmt.Println("Extracting CDDA...")
+		fmt.Println("Extracting C:BN...")
 		err = archives.Extract(zip)
 		if err != nil {
 			log.Fatal(err)

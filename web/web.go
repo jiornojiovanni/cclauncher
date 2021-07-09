@@ -46,7 +46,7 @@ func LastBuild(curses bool) (Build, error) {
 		build.Graphic = "tiles"
 	}
 
-	resp, err := http.Get("https://api.github.com/repos/CleverRaven/Cataclysm-DDA/releases?per_page=1")
+	resp, err := http.Get("https://api.github.com/repos/cataclysmbnteam/Cataclysm-BN/releases?per_page=1")
 	if err != nil {
 		return Build{}, err
 	}
@@ -74,7 +74,7 @@ func decodeResponse(resp *http.Response) (*githubResponse, error) {
 
 //GetBuild download the specified version and return the name of the zip if successful.
 func GetBuild(build Build) (string, error) {
-	resp, err := http.Get("https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-" + build.Version + "/cdda-linux-" + build.Graphic + "-x64-" + build.Version + ".tar.gz")
+	resp, err := http.Get("https://github.com/cataclysmbnteam/Cataclysm-BN/releases/download/cbn-experimental-" + build.Version + "/cbn-linux-" + build.Graphic + "-x64-" + build.Version + ".tar.gz")
 	if err != nil {
 		return "", err
 	}

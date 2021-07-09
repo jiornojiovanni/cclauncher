@@ -44,7 +44,7 @@ func Extract(name string) error {
 		}
 		info := header.FileInfo()
 
-		if strings.Split(header.Name, "-")[0] == "cataclysmdda" && !found {
+		if strings.Split(header.Name, "-")[0] == "cataclysmbn" && !found {
 			baseFolder = header.Name
 			found = true
 			err = os.Mkdir(ParentFolder, info.Mode())

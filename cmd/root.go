@@ -7,8 +7,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "cclauncher",
-	Short: "Cataclysm: DDA Linux Launcher",
-	Long: `cclauncher is a Linux launcher for Cataclysm: DDA,
+	Short: "Cataclysm: Bright Nights Linux Launcher",
+	Long: `cclauncher is a Linux launcher for Cataclysm: Bright Nights,
 capable of downloading new versions, backups and restoring of
 tilesets, sfx, mods, saves etc.`,
 }
